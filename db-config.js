@@ -3,13 +3,19 @@ var pool;
 var db;
 function createPool(){
     if(!pool){
-        pool = mysql.createPool({
-            connectionLimit: 10,
-            host : process.env.MYSQL_URI,
-            user: process.env.db_uname,
-            password: process.env.db_pass,
-            database: 'dev_db'
-        });
+        try{
+            pool = mysql.createPool({
+                connectionLimit: 10,
+                host : process.env.MYSQL_URI,
+                user: process.env.db_uname,
+                password: process.env.db_pass,
+                database: 'dev_db'
+            });
+        }catch(error){
+            console.log("error in connecting the database");
+            console.log(error);
+        }
+        
     }
     return pool;
 }
@@ -35,16 +41,18 @@ function createConnection(){
     return db;
 }
 
-module.exports = {
-    host: 'lms-mysql-db-dev.cycmupolap2j.ap-south-1.rds.amazonaws.com',
-    user: 'admin',
-    password: 'kVorojp6GmX2nYzMZj9S',
-    database: 'dev_db',
-    dialect: 'mysql',
-    pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-    }
-}
+module.exports = createPool();
+
+// module.exports = {
+//     host: 'lms-mysql-db-dev.cycmupolap2j.ap-south-1.rds.amazonaws.com',
+//     user: 'admin',
+//     password: 'kVorojp6GmX2nYzMZj9S',
+//     database: 'dev_db',
+//     dialect: 'mysql',
+//     pool: {
+//         max: 5,
+//         min: 0,
+//         acquire: 30000,
+//         idle: 10000
+//     }
+// }

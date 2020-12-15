@@ -31,14 +31,15 @@ try{
 
 try{
     seq_obj.authenticate();
-    console.log("successfullt connected to database.");
+    console.log("(+) successfully connected to database.");
 }catch(error){
-    console.log(`Error in connecting the database ${error}`)
+    console.log(`(-) Error in connecting the database ${error}`)
 }
 
 const db = {}
 db.seq_main = seq_main;
 db.seq_obj =  seq_obj;
 db.user = require("./users.model")(seq_main,seq_obj)
+db.forums = require("./forums.model")(seq_main,seq_obj)
 
 module.exports = db

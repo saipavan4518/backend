@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const dbconfig = require('../db-config');
-const dbconn = require("../models/db_orm");
-const user = dbconn.user;
-const operators = dbconn.seq_main.Op;
+//const dbconn = require("../models/db_orm");
+//const user = dbconn.user;
+// operators = dbconn.seq_main.Op;
 
 
 router.route("/").post(async (req, res)=>{

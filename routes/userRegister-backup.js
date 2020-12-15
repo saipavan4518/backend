@@ -2,7 +2,6 @@ const router = require('express').Router();
 const multer = require('multer');
 const db_pool = require("../db-config");
 
-const pavan = multer({dest: "./uploads/"});
 
 const storage1 = multer.diskStorage({
     destination: function(req, file, cb){

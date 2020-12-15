@@ -21,7 +21,7 @@ router.route("/").post(async (req, res)=>{
 
     db_pool.getConnection(function(error,connection){
         if(error){
-            return res.status(503).send({eid:2,details:"Database servers are down"});
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
         }
 
         connection.query(query, function(error, results, fields){
