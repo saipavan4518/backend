@@ -28,6 +28,7 @@ require('dotenv').config();
 const userLogin = require("./routes/userlogin-backup");
 const userRegister = require("./routes/userRegister-backup");
 const forums = require("./routes/forums");
+const profile = require("./routes/profile");
 
 
 
@@ -40,6 +41,7 @@ app.use("/uploads/profile_images",express.static("./uploads/profile_images"));
 app.use("/api/user/login",userLogin);
 app.use("/api/user/register",userRegister);
 app.use("/api/forums",forums);
+app.use("/api/profiles/",profile);
 
 app.listen(8110, ()=>{
     console.log("Server up and running");
