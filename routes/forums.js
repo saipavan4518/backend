@@ -18,6 +18,64 @@ router.route("/getforums").get((req,res) =>{
     });
 });
 
+router.route("/getforum/:id").get((req,res) =>{
+    //get all the forums present in the "forums" table.
+    const id = req.params.id;
+    const query = `select * from forums where forum_id = '${id}'`;
+    db_pool.getConnection(function(error, connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+            res.status(200).send(results);
+        });
+        connection.release();
+    });
+});
+
+
+router.route("/deleteforum/:id").delete((req,res)=>{
+    //delete the forum of the given specific id
+    const id = req.params.id
+    query = `delete from forums where forum_id = '${id}'`
+    db_pool.getConnection(function(error, connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+            res.status(200).send({message:"Succesfully Deleted"});
+        });
+        connection.release();
+    });
+});
+
+router.route("/newforum").post((req,res)=>{
+    const forum_name = req.body.forumname;
+    const forum_priority = req.body.forumpriority;
+
+    const query = `insert into forums (forum_name,forum_priority) values ('${forum_name}',${forum_priority})`;
+
+    db_pool.getConnection(function(error, connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+            res.status(200).send(results);
+        });
+        connection.release();
+    });
+});
+
+
 router.route("/getthreads").get((req,res) =>{
     //get all the threads that are present in the database
     //this is inefficient. so, we should not use.
@@ -78,6 +136,7 @@ router.route("/getthreads/search/:text").get((req,res) =>{
     });
     
 });
+
 
 
 module.exports = router;
