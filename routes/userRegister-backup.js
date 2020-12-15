@@ -14,7 +14,7 @@ const storage1 = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) =>{
-    if(file.mimetype === 'image/jpg' || file.mimetype === 'image/png'){
+    if(file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg'){
         cb(null, true);
     }else{
         cb(null, false);
@@ -22,7 +22,11 @@ const fileFilter = (req, file, cb) =>{
 }
 
 const upload = multer({
-    storage: storage1
+    storage: storage1,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 1000*1000*3
+    }
 })
 
 router.route("/").post(upload.single('profilepic'),async (req,res)=>{
