@@ -144,6 +144,8 @@ router.route("/createthread").post((req, res)=>{
     const f_id = req.body.f_id;
     const t_status = req.body.status;
     const thread_subject = req.body.subject;
+    
+
 
     const query = `insert into threads (user_id,forum_id,thread_status) values ('${u_id}',${f_id},'${t_status}')`
 
@@ -167,6 +169,76 @@ router.route("/createthread").post((req, res)=>{
         });
         connection.release();
     });
+});
+
+router.route("/thread/:threadid/:action").put((req,res)=>{
+    //here we are creating upvotes and downvotes for the thread.
+    //we need to keep in mind that a user can only upvote/downvote once.
+    // 1989: upvote 2324: downvote
+
+    const thread_id = req.params.threadid;
+    const action = req.params.action;
+
+    const valid_action = ["1989","2324"];
+    if(!thread_id || !action){
+        return res.status(400).send({eid:10,message:"Error in Query"});
+    }
+
+    if(!valid_action.includes(action) || !valid_action.includes(action)){
+        return res.status(400).send({eid:11,message:"Error in Query"});
+    }
+
+    const query = `select thread_votes  from threads where thread_id = ${thread_id}`;
+    db_pool.getConnection(function(error,connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+
+            if(results.length == 0){
+                //this is , when the given thread id is not found.
+                return res.status(400).send({eid:11,message:"Error in Query"});
+            }
+            let value = parseInt(results[0].thread_votes);
+            let up_q = "";
+            if(value > 0){
+                //do normal upvote and downvote
+                if(action == "1989"){
+                    //upvote
+                    up_q = `update threads set thread_votes = thread_votes+1 where thread_id = ${thread_id}`;
+                    value = value + 1;
+                }else{
+                    up_q = `update threads set thread_votes = thread_votes-1 where thread_id = ${thread_id}`;
+                    value = value - 1;
+                }
+            }else{
+                //value == 0, then for downvote we do nothing, set as 0 again for safety.
+                if(action == "1989"){
+                    //upvote
+                    up_q = `update threads set thread_votes = thread_votes+1 where thread_id = ${thread_id}`;
+                    value = value + 1;
+                }else{
+                    up_q = `update threads set thread_votes = 0 where thread_id = ${thread_id}`;
+                    value = 0;
+                }
+            }
+            console.log(up_q);
+            connection.query(up_q,(error,results,fields)=>{
+                if(error){
+                    return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+                }
+                res.send({
+                    thread_id:thread_id,
+                    votes:value
+                });
+            });
+        });
+        connection.release();
+    });
+
 });
 
 //here write the code for the upload
