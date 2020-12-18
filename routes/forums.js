@@ -270,7 +270,7 @@ const upload = multer({
 
 //create a folder for every user.
 
-router.route("/createpost").post(upload.single('postdata'),async(req,res)=>{
+router.route("/posts/createpost").post(upload.single('postdata'),async(req,res)=>{
     //create post
     // post_id int auto_increment primary key,
     // forum_id int,
@@ -316,7 +316,7 @@ router.route("/createpost").post(upload.single('postdata'),async(req,res)=>{
     });
 });
 
-router.route("/deletepost/:id").delete((req,res)=>{
+router.route("/posts/deletepost/:id").delete((req,res)=>{
     //delete the post of the given specific id
     const id = req.params.id
     query = `delete from posts where post_id = '${id}'`
@@ -333,5 +333,74 @@ router.route("/deletepost/:id").delete((req,res)=>{
         connection.release();
     });
 });
+
+router.route("/posts/:id/:action").put((req,res)=>{
+    const id = req.params.id;
+    const action = req.params.action;
+    //here we are creating upvotes and downvotes for the post.
+    //we need to keep in mind that a user can only upvote/downvote once.
+    // 1989: upvote 2324: downvote
+
+    const valid_action = ["1989","2324"];
+    if(!id || !action){
+        return res.status(400).send({eid:10,message:"Error in Query"});
+    }
+
+    if(!valid_action.includes(action) || !valid_action.includes(action)){
+        return res.status(400).send({eid:11,message:"Error in Query"});
+    }
+
+    const query = `select post_votes  from posts where post_id = ${id}`;
+    db_pool.getConnection(function(error,connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+
+            if(results.length == 0){
+                //this is , when the given posts id is not found.
+                return res.status(400).send({eid:11,message:"Error in Query"});
+            }
+            let value = parseInt(results[0].post_votes);
+            let up_q = "";
+            if(value > 0){
+                //do normal upvote and downvote
+                if(action == "1989"){
+                    //upvote
+                    up_q = `update posts set post_votes = post_votes + 1 where post_id = ${id}`;
+                    value = value + 1;
+                }else{
+                    up_q = `update posts set post_votes = post_votes - 1 where post_id = ${id}`;
+                    value = value - 1;
+                }
+            }else{
+                //value == 0, then for downvote we do nothing, set as 0 again for safety.
+                if(action == "1989"){
+                    //upvote
+                    up_q = `update posts set post_votes = post_votes + 1 where post_id = ${id}`;
+                    value = value + 1;
+                }else{
+                    up_q = `update posts set post_votes = 0 where post_id = ${id}`;
+                    value = 0;
+                }
+            }
+            connection.query(up_q,(error,results,fields)=>{
+                if(error){
+                    return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+                }
+                res.send({
+                    thread_id:thread_id,
+                    votes:value
+                });
+            });
+        });
+        connection.release();
+    });
+
+});
+
 
 module.exports = router;
