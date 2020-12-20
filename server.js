@@ -35,6 +35,7 @@ const profile = require("./routes/profile");
 app.use(cors());
 app.use(express.json());
 app.use("/uploads/profile_images",express.static("./uploads/profile_images"));
+app.use("/uploads/posts",express.static("./uploads/posts"));
 
 
 

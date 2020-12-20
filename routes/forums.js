@@ -80,7 +80,7 @@ router.route("/newforum").post((req,res)=>{
 router.route("/getthreads").get((req,res) =>{
     //get all the threads that are present in the database
     //this is inefficient. so, we should not use.
-    const query = "select * from threads";
+    const query = "select * from threads as t inner join threads_subject as s on t.thread_id=s.thread_id;";
     db_pool.getConnection(function(error, connection){
         if(error){
             return res.status(503).send({eid:2,details:"Database servers are down",error:error});
@@ -316,6 +316,25 @@ router.route("/posts/createpost").post(upload.single('postdata'),async(req,res)=
     });
 });
 
+router.route("/posts/getpost/:id").get((req,res)=>{
+    const id = req.params.id;
+    const query = `select * from posts as p inner join posts_subject as s on p.post_id = s.post_id where p.thread_id = ${id}`
+
+    db_pool.getConnection(function(error, connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+            res.status(200).send(results);
+        });
+        connection.release();
+    });
+});
+
+
 router.route("/posts/deletepost/:id").delete((req,res)=>{
     //delete the post of the given specific id
     const id = req.params.id
@@ -392,7 +411,7 @@ router.route("/posts/:id/:action").put((req,res)=>{
                     return res.status(503).send({eid:3,details:"Invalid Query",error:error});
                 }
                 res.send({
-                    thread_id:thread_id,
+                    postid:id,
                     votes:value
                 });
             });
