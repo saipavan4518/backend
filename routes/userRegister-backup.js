@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const db_pool = require("../db-config");
+const path = require("path");
 
 
 const storage1 = multer.diskStorage({
@@ -9,7 +10,7 @@ const storage1 = multer.diskStorage({
     },
     filename: function(req, file, cb){ 
         //windows doesnt support : element, so we need to replace.
-        cb(null, new Date().toISOString().replace(/:/g,'')+"_"+file.originalname);
+        cb(null, "img_"+new Date().toISOString().replace(/:/g,'')+"_"+path.extname(file.originalname));
     }
 });
 
@@ -37,7 +38,17 @@ router.route("/").post(upload.single('profilepic'),async (req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
 
-    var path = "http://localhost:8110/"+req.file.path.replace(/\\/g,'/');
+    console.log(req)
+    console.log(req.file)
+
+    try{
+
+        var path = "http://localhost:8110/"+req.file.path.replace(/\\/g,'/');
+    }catch(e){
+        console.log("error in getting the file")
+    }
+
+    
 
     const query = `insert into user values("${username}","${fullname}","${regdno}","${email}","${password}","${path}")`
     

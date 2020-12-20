@@ -32,9 +32,9 @@ router.route("/").post(async (req, res)=>{
             // compare the passwords
             const db_password = results[0].password;
             if(e_password === db_password){
-                res.send("Login successfull");
+                res.send({flag:true});
             }else{
-                res.send('Login Failed');
+                res.send({flag:false});
             }
         });
 
