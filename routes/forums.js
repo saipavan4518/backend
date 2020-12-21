@@ -241,6 +241,24 @@ router.route("/thread/:threadid/:action").put((req,res)=>{
 
 });
 
+//delete thread
+router.route("/deletethread/:id").delete((req,res)=>{
+    const id = req.params.id;
+    query = `delete from threads where thread_id = '${id}'`
+    db_pool.getConnection(function(error, connection){
+        if(error){
+            return res.status(503).send({eid:2,details:"Database servers are down",error:error});
+        }
+        connection.query(query, (error, results, fields)=>{
+            if(error){
+                return res.status(503).send({eid:3,details:"Invalid Query",error:error});
+            }
+            res.status(200).send({eid:5,message:"Succesfully Deleted"});
+        });
+        connection.release();
+    });
+})
+
 //here write the code for the upload
 const storage1 = multer.diskStorage({
     destination: function(req,file,cb){
