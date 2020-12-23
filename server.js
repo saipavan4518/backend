@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
+const http = require('http');
 
 /*const dbconn = require('./models/db_orm')
 
@@ -31,7 +32,6 @@ const forums = require("./routes/forums");
 const profile = require("./routes/profile");
 
 
-
 app.use(cors());
 app.use(express.json());
 app.use("/uploads/profile_images",express.static("./uploads/profile_images"));
@@ -44,6 +44,35 @@ app.use("/api/user/register",userRegister);
 app.use("/api/forums",forums);
 app.use("/api/profiles/",profile);
 
-app.listen(8110, ()=>{
-    console.log("Server up and running");
+
+var server = http.createServer(app);
+const io = require('socket.io')(server,{
+    cors: {
+        origin: '*',
+      }
+});
+
+io.on('connection',client =>{
+    client.on('render_threads',()=>{
+        //this is for re-rendering the components
+        io.emit("render_threads_client")
+        console.log("rendering the threads")
+    })
+
+    client.on('update_threads',(data)=>{
+        // this is for upvote and downvote
+        console.log(data)
+        // emit this data to every person, except the sender
+        client.broadcast.emit("update_threads_client",data)
+    })
+
+    client.on('disconnect',()=>{
+        console.log('client disconnected');
+    })
+});
+
+
+
+server.listen(8110, ()=>{
+    console.log("Server up and running with socket io functio");
 });

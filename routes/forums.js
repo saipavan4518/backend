@@ -253,7 +253,7 @@ router.route("/deletethread/:id").delete((req,res)=>{
             if(error){
                 return res.status(503).send({eid:3,details:"Invalid Query",error:error});
             }
-            res.status(200).send({eid:5,message:"Succesfully Deleted"});
+            res.status(200).send({eid:0,message:"Succesfully Deleted"});
         });
         connection.release();
     });
